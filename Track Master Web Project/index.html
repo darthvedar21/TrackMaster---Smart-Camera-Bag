@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>TrackMaster - Camera Bag</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <img
+      alt="camerabag"
+      src="./Untitled design (2).png"
+      width="100%"
+      height="auto"
+    />
+    <div class="container">
+      <table>
+        <thead>
+          <tr>
+            <th>Date/Time</th>
+            <th>Longitude</th>
+            <th>Latitude</th>
+            <th>Google Maps</th>
+          </tr>
+        </thead>
+        <tbody id="dataBody"></tbody>
+      </table>
+    </div>
+
+    <div class="footer">
+      <p>
+        TrackMaster - Camera Bag &copy; 2023. All rights reserved. |
+        <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
+      </p>
+    </div>
+
+    <script>
+      const url =
+        "https://api.thingspeak.com/channels/2186794/feeds.json?api_key=8MTIEHO4D2QZB04U&results=200";
+
+      // Function to convert UTC to GMT+5:30 (Indian Standard Time)
+      function convertToIST(utcTime) {
+        const date = new Date(utcTime);
+        const istTime = new Date(date.getTime() + 5.5 * 60 * 60 * 1000);
+        return istTime.toUTCString();
+      }
+
+      // Fetch data from the ThingSpeak API
+      fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+          const tableBody = document.getElementById("dataBody");
+
+          // Iterate over each entry in the data and create a row in the table
+          data.feeds.forEach((feed) => {
+            const row = document.createElement("tr");
+            const dateTimeCell = document.createElement("td");
+            const longitudeCell = document.createElement("td");
+            const latitudeCell = document.createElement("td");
+            const googleMapsCell = document.createElement("td");
+            const googleMapsLink = document.createElement("a");
+
+            // Convert the timestamp to IST
+            const istTime = convertToIST(feed.created_at);
+
+            dateTimeCell.textContent = istTime;
+            longitudeCell.textContent = feed.field1;
+            latitudeCell.textContent = feed.field2;
+
+            // Create the Google Maps link
+            googleMapsLink.href = `https://www.google.com/maps/search/?api=1&query=${feed.field1},${feed.field2}`;
+            googleMapsLink.target = "_blank";
+            googleMapsLink.textContent = "View on Google Maps";
+            googleMapsLink.classList.add("google-maps-link");
+
+            googleMapsCell.appendChild(googleMapsLink);
+
+            row.appendChild(dateTimeCell);
+            row.appendChild(longitudeCell);
+            row.appendChild(latitudeCell);
+            row.appendChild(googleMapsCell);
+
+            tableBody.appendChild(row);
+          });
+        })
+        .catch((error) => console.log("Error:", error));
+    </script>
+  </body>
+</html>
